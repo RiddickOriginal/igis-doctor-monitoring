@@ -21,7 +21,7 @@ public class IgisController {
     public ResponseEntity<Map<String, String>> getHospitalMapByType(@RequestParam("type") HospitalType type) {
         Map<String, String> tipsMap = service.getTipsMap(type);
         if (tipsMap == null)
-            return ResponseEntity.internalServerError().build();
+            return ResponseEntity.badRequest().build();
         return ResponseEntity.ok(tipsMap);
     }
 
@@ -31,5 +31,10 @@ public class IgisController {
         if (doctorsList == null)
             return ResponseEntity.badRequest().build();
         return ResponseEntity.ok(doctorsList);
+    }
+
+    @GetMapping("/schedule")
+    public ResponseEntity<Map> getDoctorSchedule(@RequestParam("hospitalId") String hospitalId, @RequestParam("docId") String docId){
+        return null;
     }
 }

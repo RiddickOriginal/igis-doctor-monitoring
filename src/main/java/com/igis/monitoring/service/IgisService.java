@@ -16,36 +16,34 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Data
 @Service
 @RequiredArgsConstructor
 public class IgisService {
     private final RestTemplate restTemplate;
-    private final HostsProperties hosts;
-    private final String DOCTORS_LIST_PAGE = "&page=zapdoc";
-    private final String REQUEST_PARAM = "?obj=";
+    private final UrlConstructor constructor;
+    private static final Pattern docIdPattern = Pattern.compile("\\d*$");
 
     public Map<String, String> getTipsMap(HospitalType type) {
         Document document;
         try {
-            document = Jsoup.connect(hosts.getCategoryUrl(type)).get();
+            document = Jsoup.connect(constructor.getCategoryUrl(type)).get();
         } catch (IOException e) {
             return null;
         }
         Elements elements = document.select("a[href^='?obj=']");
         Map<String, String> map = new HashMap<>();
-        elements.forEach((element) -> {
-            map.put(element.text(), element.attr("href").replace("?obj=", ""));
-        });
+        elements.forEach((element) -> map.put(element.text(), element.attr("href").replace("?obj=", "")));
         return map;
     }
 
-    public Map<String, List<DoctorCard>> getDoctorsList(String id)  {
-        String url = hosts.getBaseUrl() + REQUEST_PARAM + id + DOCTORS_LIST_PAGE;
+    public Map<String, List<DoctorCard>> getDoctorsList(String hospitalId)  {
         Document document;
         try {
-            document = Jsoup.connect(url).get();
+            document = Jsoup.connect(constructor.getDoctorsListUrl(hospitalId)).get();
         } catch (IOException e) {
             return null;
         }
@@ -58,11 +56,16 @@ public class IgisService {
                 continue;
             Elements category = element.select("h2");
             if (category.isEmpty()) {
-                String link = hosts.getBaseUrl() + element.selectFirst("a").attr("href");
+                String docId = "?";
+                Matcher matcher = docIdPattern.matcher(element.selectFirst("a").attr("href"));
+                if (matcher.find()){
+                    docId = matcher.group();
+                }
+                String link = constructor.withHost(element.selectFirst("a").attr("href"));
                 String ticketsCount = element.select("a+a").text();
                 String name = element.selectFirst("b").text();
                 String bio = element.select("div+small").text();
-                DoctorCard doctorCard = new DoctorCard(name, link, bio);
+                DoctorCard doctorCard = new DoctorCard(docId, name, link, bio, ticketsCount);
                 doctorsByCategory.get(currentCategory).add(doctorCard);
                 continue;
             }
@@ -71,5 +74,15 @@ public class IgisService {
             currentCategory = category.text();
         }
         return doctorsByCategory;
+    }
+
+    public Map getDoctorsSchedule(String hospitalId, String docId){
+        Document document;
+        try {
+            document = Jsoup.connect(constructor.getDoctorsScheduleUrl(hospitalId, docId)).get();
+        } catch (IOException e) {
+            return null;
+        }
+        return null;
     }
 }
