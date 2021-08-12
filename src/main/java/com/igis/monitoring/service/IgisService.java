@@ -2,6 +2,8 @@ package com.igis.monitoring.service;
 
 import com.igis.monitoring.dto.DoctorCard;
 import com.igis.monitoring.dto.HospitalType;
+import com.igis.monitoring.dto.ScheduleTime;
+import com.igis.monitoring.dto.TimeType;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.select.Elements;
@@ -60,8 +62,13 @@ public class IgisService {
         return doctorsByCategory;
     }
 
-    public Map getDoctorsSchedule(String hospitalId, String docId) {
+    public Map<TimeType, List<ScheduleTime>> getDoctorsSchedule(String hospitalId, String docId) {
         Elements elements = elementsService.getElementsByLink(constructor.getDoctorsScheduleUrl(hospitalId, docId), ".table-border td");
+        Map<TimeType, ArrayList<ScheduleTime>> timeTypeArrayListMap = Map.of(
+                TimeType.AVAILABLE, new ArrayList<>(),
+                TimeType.HOLD, new ArrayList<>(),
+                TimeType.HOLD_UNTIL_EVENING, new ArrayList<>()
+        );
 
         return null;
     }

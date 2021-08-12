@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ScheduleTime {
+    private String dayOfWeek;
     private String time;
-    private TimeType type;
 }
