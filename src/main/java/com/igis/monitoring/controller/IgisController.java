@@ -17,7 +17,7 @@ import java.util.Map;
 public class IgisController {
     private final IgisService service;
 
-    @GetMapping("/tips")
+    @GetMapping("/hospitals")
     public ResponseEntity<Map<String, String>> getHospitalMapByType(@RequestParam("type") HospitalType type) {
         Map<String, String> tipsMap = service.getTipsMap(type);
         if (tipsMap == null)
