@@ -6,6 +6,7 @@ import com.igis.monitoring.dto.ScheduleTime;
 import com.igis.monitoring.dto.TimeType;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -43,11 +44,14 @@ public class IgisService {
             Elements category = element.select("h2");
             if (category.isEmpty()) {
                 String docId = "?";
-                Matcher matcher = docIdPattern.matcher(element.selectFirst("a").attr("href"));
+                Element a = element.selectFirst("a");
+                if (a == null)
+                    continue;
+                Matcher matcher = docIdPattern.matcher(a.attr("href"));
                 if (matcher.find()) {
                     docId = matcher.group();
                 }
-                String link = constructor.withHost(element.selectFirst("a").attr("href"));
+                String link = constructor.withHost(a.attr("href"));
                 String ticketsCount = element.select("a+a").text();
                 String name = element.selectFirst("b").text();
                 String bio = element.select("div+small").text();
